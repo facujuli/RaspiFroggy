@@ -74,7 +74,7 @@ void initialize_objects(world_t* sim)
     {
         sim->objetos[i].separation = separation[i];
         sim->objetos[i].y = coor_y[i];
-        sim->objetos[i].speed = 50*speed[i];
+        sim->objetos[i].speed = 30*speed[i];
         sim->objetos[i].cant_squares = squares_cant[i];
         sim->objetos[i].screen_rep = screen_rep[i];
         sim->objetos[i].x = (float*) malloc((sim->objetos[i].screen_rep) * sizeof(float)); // creo una especie de arreglo que contendra la coordenada en X de cada copia de este objeto.

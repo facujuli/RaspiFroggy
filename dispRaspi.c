@@ -7,7 +7,8 @@
 #include "winCond.h"
 #include "joystck.h"
 #include <unistd.h>
-#define THRESHOLD 40
+
+
 static void dibujar_objeto(int macro_type, world_t* sim);
 static void borrarLinea(int i, world_t* sim);
 
@@ -20,24 +21,32 @@ void* display(void* simPtrPtr)
     disp_init();
     disp_clear();
     disp_update();
+    
+    int titilar = 0;
+
+    
 
 while(sim->running == ON)
 {
     coord = joy_read();
     int i;
 
-    
     for(i = 1; i < OBJ_MAX; i++)
     {
         borrarLinea(i, sim);      
         dibujar_objeto(i, sim);
     }
 
+    titilar++;
     dcoord_t ps = {sim->objetos[FROG].x[0], sim->objetos[FROG].y};
-    disp_write(ps, D_ON);		//prende el led
+
+    disp_write(ps, titilar%2);		//prende el led si titilar es par.
+    
+        
     disp_update();			//actualiza el display 
     
-    move_objects(sim);
+    //move_objects(sim);
+    usleep(250000);
 
     if(coord.sw != J_NOPRESS)
     {
@@ -61,7 +70,6 @@ void dibujar_objeto(int macro_type, world_t* sim)
             {
                 dcoord_t pos={ x + k, sim->objetos[macro_type].y };
                 disp_write(pos, D_ON);		//prende el led
-                disp_update();			//actualiza el display 
             }
         }
     }

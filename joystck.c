@@ -13,14 +13,13 @@
 #include "dispRaspi.h"
 #include "backEnd.h"
 
-#define TITILRATIO 100  //Ratio con el cual titilara el led de la posición de la rana
+
 #define THRESHOLD 40	//Límite a partir del cual se mueve el LED encendido
 
-static int titilar = 0;
 
 void* joystick(void* simPtrPtr)
 {
-    usleep(200000);
+    usleep(200000);		//sleep para no tener problemas con la inicialización del otro thread
 	world_t** simPtr = (world_t**)simPtrPtr;
     world_t *sim = *simPtr;
 
@@ -36,13 +35,15 @@ while(sim->running)
     //EL siguiente bloque se encarga de la lectura del joystick, 
     //como tambien de borrar el led que prendio previamente la rana
     //se corre mientras no se presione el switch
+	int i= 0;
 	do
 	{
+		i++;
 		coord = joy_read();	//Guarda las coordenadas medidas
 		ps.x =  sim->objetos[FROG].x[0];
         ps.y = sim->objetos[FROG].y;
 
-        printf("X: %f   Y:   %f\n", (float)sim->objetos[FROG].x[0], (float)sim->objetos[FROG].y);
+        //printf("X: %f   Y:   %f\n", (float)sim->objetos[FROG].x[0], (float)sim->objetos[FROG].y);
 		//Establece la próxima posición según las coordenadas medidas
 		if(coord.x > THRESHOLD && sim->objetos[FROG].x[0] < DISP_MAX_X)
 		{
@@ -73,12 +74,7 @@ while(sim->running)
             usleep(500000);
 		}
 
-        if(!sim->running)
-            break;
-
-	} while( coord.sw == J_NOPRESS );	//termina si se presiona el switch
-
-
+	} while(coord.sw == J_NOPRESS && sim->running );	//termina si se presiona el switch
 
 
 }
