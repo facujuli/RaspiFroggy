@@ -38,6 +38,7 @@ while(sim->running)
 	int i= 0;
 	do
 	{
+		while(sim->menu_status != GAME);		//Si no esta jugando, no modifiques las coordenadas
 		i++;
 		coord = joy_read();	//Guarda las coordenadas medidas
 		ps.x =  sim->objetos[FROG].x[0];

@@ -31,6 +31,8 @@ void initialize_objects(world_t* sim)
 {
     srand(time(0));
 
+    sim->lives = 2;
+
     sim->lily[0] = 0;
     sim->lily[1] = 0;
     sim->lily[2] = 0;
@@ -168,19 +170,22 @@ void move_objects(world_t* sim)
 
     if(sim->objetos[FROG].y == 3)
     {
-        for(j = 0; j < 6; j++)
+        for(j = 0; j < 6; j++)  //Deteccion de los lilypads
         {
             if(sim->objetos[FROG].x[0] == (2 + 2*j))
             {
                 sim->lily[j] = 1;
-                sim->lives++;
+
+               // if(sim->lives<3)
+                 //   sim->lives++;   //suma vidas cada vez q llega a un lilypad
+
                 sim->points += 20;
                 rePositionFrog(sim);
             }
         }
     }
 
-    if(sim->lily[0] && sim->lily[1] && sim->lily[2] && sim->lily[3] && sim->lily[4] && sim->lily[5])
+    if(sim->lily[0] && sim->lily[1] && sim->lily[2] && sim->lily[3] && sim->lily[4] && sim->lily[5])    //Si junto todas las ranas
     {
         sim->nivel++;
         sim->lily[0] = 0;
@@ -190,7 +195,10 @@ void move_objects(world_t* sim)
         sim->lily[4] = 0;
         sim->lily[5] = 0;
         sim->points +=100;
-        sim->lives++;
+
+        if(sim->lives<3)        //suma una vida , limite de 3 maximas
+            sim->lives++;
+
         rePositionFrog(sim);
         sim->lives = CANT_DE_VIDAS;
         //ya junte 5 ranas paso de nivel
@@ -201,22 +209,28 @@ void move_objects(world_t* sim)
     
     
 
-    if(collide(sim) && (sim->objetos[FROG].y >= sim->objetos[TRUCK].y) )
+    if(collide(sim) && (sim->objetos[FROG].y >= sim->objetos[TRUCK].y) )    //detecta choque
     {
         rePositionFrog(sim);
         if(sim->lives <= 0 )
         {
+            //DESDE ACA SALTO A INITIALIZE OBJETCS Y LIVES LLEGA A 0
+            sim->redraw = 1;   //se arranca a reasignar
             gameOver(sim);
             resetFrog(sim);
+             sim->redraw = 0;   //se termino de redibujar
         }
     }
-    else if( (!collide(sim)) && (sim->objetos[FROG].y >= sim->objetos[TRONCO2].y) && (sim->objetos[FROG].y <= sim->objetos[TORTU1].y) && !(sim->onBoard))
+    else if( (!collide(sim)) && (sim->objetos[FROG].y >= sim->objetos[TRONCO2].y) //rana ahogada
+            && (sim->objetos[FROG].y <= sim->objetos[TORTU1].y) && !(sim->onBoard))
     {
         rePositionFrog(sim);
         if(sim->lives <= 0 )
         {
+            sim->redraw = 1;
             gameOver(sim);
             resetFrog(sim);
+            sim->redraw = 0;
         }
     }
 }
@@ -337,55 +351,3 @@ float round_if(float n, float speed)
         }
     }
 }
-
-void resetPositions(world_t* sim)
-{
-    srand(time(0));
-    
-    float speed[OBJ_MAX] = {VEL(1), VEL(1), VEL(1), -VEL(5), -VEL(1), VEL(1), -VEL(1), VEL(1), VEL(1), VEL(1)};                                                                                                                 
-    int separation[OBJ_MAX] = { 0, 4, 4, 9, 4, 5, 6, 6, 6, 7 };                                                                                              
-    int screen_rep[OBJ_MAX] = { 0, 3, 3, 1, 4, 3, 3, 3, 3, 3 };                                                                                                              
-    int coor_y[OBJ_MAX] = {0, 13, 12, 11, 10, 9, 7, 6, 5, 4};
-    int squares_cant[OBJ_MAX] = {1,1,1,1,1,2,3,3,3,3};
-    
-    int j;
-    if(sim->nivel >= 1)
-    {
-        for(j = 1; j < OBJ_MAX; j++)
-        {
-            speed[j] = speed[j] + (0.05)*(sim->nivel)*speed[j]; 
-            if(j <= TRUCK && j != CAR3)
-            {
-                screen_rep[j] = rand() %5;
-            }            
-            else if(j == CAR3)
-            {
-                screen_rep[3] = rand() % 1 + 1;
-            }
-            else if(j <= TRONCO2 && j < TRUCK)
-            {
-                screen_rep[j] = rand() % 1 + 2;
-            }
-        }
-    }
-    
-    int i;
-    for(i = 1; i < OBJ_MAX; i++)
-    {
-        sim->objetos[i].separation = separation[i];
-        sim->objetos[i].y = coor_y[i];
-        sim->objetos[i].speed = speed[i];
-        sim->objetos[i].cant_squares = squares_cant[i];
-        sim->objetos[i].screen_rep = screen_rep[i];
-        sim->objetos[i].x[0] =  (rand()%17);            //se designa la coordenada x de la primer variacion del objeto de manera aleatoria con un numero <= 16;
-
-        int k;
-        for(k = 1; k < sim->objetos[i].screen_rep; k++)
-        {
-            sim->objetos[i].x [k] = (int) (sim->objetos[i].x [k-1] + sim->objetos[i].separation) % 17; //inicializo los valores de cada coordenada x del objeto, separadas homogeneamente
-            
-        }
-    }
-}
-
-

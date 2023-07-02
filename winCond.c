@@ -15,14 +15,14 @@
 
 void rePositionFrog(world_t* sim)
 { 
-    sim->objetos[FROG].x[0] = 7;                
+    sim->objetos[FROG].x[0] = 8;                
     sim->objetos[FROG].y = 14;
     sim->lives--;     
 }
 
 void resetFrog(world_t* sim)
 {
-    sim->objetos[FROG].x[0] = 7;                
+    sim->objetos[FROG].x[0] = 8;                
     sim->objetos[FROG].y = 14;
     sim->lives = CANT_DE_VIDAS;
     sim->points = 0;
@@ -38,8 +38,9 @@ void gameOver(world_t* sim)
         memset(sim->nickName, '\0', sizeof(sim->nickName));
         resetBitmaps(sim);
     #endif
-
-    resetPositions(sim);
+    //sim->running = !sim->running;
+    free_memory(sim, 0);
+    initialize_objects(sim);
 
 }
 
