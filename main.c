@@ -88,7 +88,7 @@ int main(void)
     destroy_allegro(&sim);
     printf("Destrui todo lo de allegro correctamente\n");
 #endif
-    
+    printf("puntos: %d\n", sim.points);
     printf("fin del programa\n");
     return 0;
     

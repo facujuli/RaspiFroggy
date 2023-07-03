@@ -32,6 +32,11 @@ void initialize_objects(world_t* sim)
     srand(time(0));
 
     sim->lives = 3;
+    if(sim->nivel == 0)
+    {
+        sim->points = 0;
+    }
+    
 
     sim->lily[0] = 0;
     sim->lily[1] = 0;
@@ -55,7 +60,7 @@ void initialize_objects(world_t* sim)
     {
         for(j = 1; j < OBJ_MAX; j++)
         {
-            speed[j] = speed[j] + (0.05)*(sim->nivel)*speed[j]; 
+            speed[j] = speed[j] + (0.25)*(sim->nivel)*speed[j]; //incremetno de 25% en la velocidad
             if(j <= TRUCK && j != CAR3)
             {
                 screen_rep[j] = rand() %5;
@@ -77,16 +82,28 @@ void initialize_objects(world_t* sim)
         sim->objetos[i].separation = separation[i];
         sim->objetos[i].y = coor_y[i];
         sim->objetos[i].speed = 30*speed[i];
+        #ifdef RASPI
         if(i > TRUCK)
         {
             sim->objetos[i].speed = 15*speed[i];
         }
+        #endif
         sim->objetos[i].cant_squares = squares_cant[i];
         sim->objetos[i].screen_rep = screen_rep[i];
-        if(i%2 == 0 && i <= TRUCK)
+        #ifdef RASPI
+        if(i%2 == 0)
         {
-            sim->objetos[i].screen_rep = 0;
+            if(i <= TRUCK)
+            {
+                sim->objetos[i].screen_rep = 0;
+            }
+            else
+            {
+                sim->objetos[i].screen_rep = 15;
+            }
+                
         }
+        #endif
         sim->objetos[i].x = (float*) malloc((sim->objetos[i].screen_rep) * sizeof(float)); // creo una especie de arreglo que contendra la coordenada en X de cada copia de este objeto.
         sim->objetos[i].x[0] =  (rand()%17);            //se designa la coordenada x de la primer variacion del objeto de manera aleatoria con un numero <= 16;
 
@@ -94,7 +111,16 @@ void initialize_objects(world_t* sim)
         
         for(k = 1; k < sim->objetos[i].screen_rep; k++)
         {
-            sim->objetos[i].x [k] = (int) (sim->objetos[i].x [k-1] + sim->objetos[i].separation) % 17; //inicializo los valores de cada coordenada x del objeto, separadas homogeneamente
+            if (sim->objetos[i].screen_rep == 15)
+            {
+                sim->objetos[i].x [k] = k-1;
+            }
+            else
+            {
+                sim->objetos[i].x [k] = (int) (sim->objetos[i].x [k-1] + sim->objetos[i].separation) % 17; 
+                //inicializo los valores de cada coordenada x del objeto, separadas homogeneamente
+            
+            }
             
         }
         

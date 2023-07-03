@@ -135,16 +135,37 @@ while(sim->running)
 
 void dibujar_objeto(int macro_type, world_t* sim)		
 {
-    int j,k,l;
+    int j,k,l, m;
+    dcoord_t pos;
+    for(l = 0; l < 16; l++)
+    {
+        if(macro_type > TRUCK)
+        {
+            pos.x = l;
+            pos.y = sim->objetos[macro_type].y;
+            
+            disp_write(pos, D_ON);		//prende el led
+        }
+    }
+    
     for(j = 0 ; j < sim->objetos[macro_type].screen_rep; j++)
     {
         int x = (int)round_if(sim->objetos[macro_type].x[j], sim->objetos[macro_type].speed);
         for (k = 0; k < sim->objetos[macro_type].cant_squares; k++)
         { 
-            if(x + k >= -0.5 && x + k < 15.5)
+            if(x + k >= -0.5 && x + k < 15.5 && macro_type <= TRUCK)
             {
-                dcoord_t pos={ x + k, sim->objetos[macro_type].y };
+                pos.x =  x + k;
+                pos.y = sim->objetos[macro_type].y;
+
                 disp_write(pos, D_ON);		//prende el led
+            }
+            else if(x + k >= -0.5 && x + k < 15.5 && macro_type > TRUCK)
+            {
+                pos.x =  x + k;
+                pos.y = sim->objetos[macro_type].y;
+
+                disp_write(pos, D_OFF);		//apaga el led
             }
         }
     }
