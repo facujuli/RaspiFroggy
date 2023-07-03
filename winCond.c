@@ -17,7 +17,8 @@ void rePositionFrog(world_t* sim)
 { 
     sim->objetos[FROG].x[0] = 8;                
     sim->objetos[FROG].y = 14;
-    sim->lives--;     
+    sim->lives--;    
+    return; 
 }
 
 void resetFrog(world_t* sim)

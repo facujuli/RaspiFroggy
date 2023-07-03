@@ -31,7 +31,7 @@ void initialize_objects(world_t* sim)
 {
     srand(time(0));
 
-    sim->lives = 2;
+    sim->lives = 3;
 
     sim->lily[0] = 0;
     sim->lily[1] = 0;
@@ -40,7 +40,7 @@ void initialize_objects(world_t* sim)
     sim->lily[4] = 0;
     sim->lily[5] = 0;
 
-    float speed[OBJ_MAX] = {VEL(5), VEL(5), VEL(5), -VEL(9), -VEL(5), VEL(5), -VEL(5), VEL(5), -VEL(5), VEL(5)};     //Arreglo que contendrá en cada columna las respectivas velocidades de los objetos.
+    float speed[OBJ_MAX] = {VEL(5), VEL(5), VEL(5), -VEL(9), -VEL(5),VEL(5), -VEL(5), VEL(5), -VEL(5), VEL(5)};     //Arreglo que contendrá en cada columna las respectivas velocidades de los objetos.
                                                                                                                     //cada fila representará un nivel distinto
     int separation[OBJ_MAX] = { 0, 4, 4, 9, 4, 5, 6, 6, 6, 7 };                                                     //Arreglo que contendrá en cada columna las respectivas separaciones 
                                                                                                                     //q posseen entre si los objetos
@@ -77,8 +77,16 @@ void initialize_objects(world_t* sim)
         sim->objetos[i].separation = separation[i];
         sim->objetos[i].y = coor_y[i];
         sim->objetos[i].speed = 30*speed[i];
+        if(i > TRUCK)
+        {
+            sim->objetos[i].speed = 15*speed[i];
+        }
         sim->objetos[i].cant_squares = squares_cant[i];
         sim->objetos[i].screen_rep = screen_rep[i];
+        if(i%2 == 0 && i <= TRUCK)
+        {
+            sim->objetos[i].screen_rep = 0;
+        }
         sim->objetos[i].x = (float*) malloc((sim->objetos[i].screen_rep) * sizeof(float)); // creo una especie de arreglo que contendra la coordenada en X de cada copia de este objeto.
         sim->objetos[i].x[0] =  (rand()%17);            //se designa la coordenada x de la primer variacion del objeto de manera aleatoria con un numero <= 16;
 
@@ -176,8 +184,7 @@ void move_objects(world_t* sim)
             {
                 sim->lily[j] = 1;
 
-               // if(sim->lives<3)
-                 //   sim->lives++;   //suma vidas cada vez q llega a un lilypad
+                sim->lives++;   //suma vidas para compensar lo de abajo
 
                 sim->points += 20;
                 rePositionFrog(sim);

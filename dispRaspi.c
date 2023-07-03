@@ -36,6 +36,7 @@ while(sim->running)
     {                                       
         coord = joy_read();
         int i;
+        dcoord_t ps;
 
         disp_clear();
         for(i = 1; i < OBJ_MAX; i++)
@@ -46,9 +47,60 @@ while(sim->running)
                 dibujar_objeto(i, sim);
             }
         }
+        for(i = 0; i < 16; i++)
+        {
+            ps.x = i;
+            ps.y = 3;
+            disp_write(ps, D_ON);
+            if(i == 2 || i == 4 || i == 6 || i == 8 || i == 10 || i == 12)
+            {
+                disp_write(ps, sim->lily[i/2 -1]);// pinto el lilypad
+            }
+            
+        }
+        if(sim->lives>= 1)
+        {
+            ps.y = 0;
+            ps.x = 15;
+            disp_write(ps, D_ON);
+            ps.x = 14;
+            disp_write(ps, D_ON);
+            ps.y = 1;
+            ps.x = 15;
+            disp_write(ps, D_ON);
+            ps.x = 14;
+            disp_write(ps, D_ON);
+        }
+        if(sim->lives>= 2)
+        {
+            ps.y = 0;
+            ps.x = 12;
+            disp_write(ps, D_ON);
+            ps.x = 11;
+            disp_write(ps, D_ON);
+            ps.y = 1;
+            ps.x = 12;
+            disp_write(ps, D_ON);
+            ps.x = 11;
+            disp_write(ps, D_ON);
+        }
+        if(sim->lives>= 3)
+        {
+            ps.y = 0;
+            ps.x = 9;
+            disp_write(ps, D_ON);
+            ps.x = 8;
+            disp_write(ps, D_ON);
+            ps.y = 1;
+            ps.x = 9;
+            disp_write(ps, D_ON);
+            ps.x = 8;
+            disp_write(ps, D_ON);
+        }
 
         titilar++;
-        dcoord_t ps = {sim->objetos[FROG].x[0], sim->objetos[FROG].y};
+        ps.x = sim->objetos[FROG].x[0]; 
+        ps.y = sim->objetos[FROG].y;
 
         disp_write(ps, titilar%2);		//prende el led si titilar es par.
         
@@ -60,7 +112,7 @@ while(sim->running)
             move_objects(sim);
         }
             
-        usleep(250000);
+        usleep(200000);
 
         
         if(coord.sw != J_NOPRESS)
@@ -71,8 +123,9 @@ while(sim->running)
     }
     if(sim->menu_status == PAUSE_MENU)
     {
-        usleep(250000);
         pausa(sim);
+
+        printf("ESCAPE\n");
         sim->running = !sim->running;
     }
 }
@@ -82,7 +135,7 @@ while(sim->running)
 
 void dibujar_objeto(int macro_type, world_t* sim)		
 {
-    int j,k;
+    int j,k,l;
     for(j = 0 ; j < sim->objetos[macro_type].screen_rep; j++)
     {
         int x = (int)round_if(sim->objetos[macro_type].x[j], sim->objetos[macro_type].speed);
@@ -115,72 +168,118 @@ void borrarLinea(int i, world_t* sim)
 
 static void pausa(world_t* sim)
 {
-    disp_clear();           
-    dcoord_t pos;
-	
-    //por defecto las letras arrancan desde la fila 14
-    int index2let = 1;
-    int i,j;
-    int map[5][3];
+    int prev = sim->key_pressed;
 
-    int len = 0;
+    while (sim->menu_status == PAUSE_MENU)
+    {   
+            
+        disp_clear();           
+        dcoord_t pos;
+        
+        //por defecto las letras arrancan desde la fila 14
+        int index2let = 1;
+        int i,j;
+        int map[5][3];
 
-    char word[4] = {'E', 'X', 'I', 'UT'};
+        char word[4];
 
-    while (len <4)
-    {
-        letterToMat(map, word[len]);
-
-        for (j = 0; j < 3; j++)
+        if(sim->key_pressed == 0)   // 0: PLAY, 1: EXIT,  2: RESTART
         {
-            for(i = 0; i < 5; i++)
+            word[0] = 'P';
+            word[1] = 'L';
+            word[2] = 'A';
+            word[3] = 'Y';
+        }
+        else if(sim->key_pressed == 1)
+        {
+            word[0] = 'E';
+            word[1] = 'X';
+            word[2] = 'I';
+            word[3] = 'T';
+        }
+        else if(sim->key_pressed == 2)
+        {
+            word[0] = 'L';
+            word[1] = 'U';
+            word[2] = 'L';
+            word[3] = 'A';
+        }
+
+
+        int len = 0;
+        while (len <4)
+        {
+            letterToMat(map, word[len]);
+
+            for (j = 0; j < 3; j++)
             {
-                pos.y = 6 +i;
-                pos.x = index2let +j;
-                if(map[i][j])
+                for(i = 0; i < 5; i++)
                 {
-                    disp_write(pos, D_ON);
+                    pos.y = 6 +i;
+                    pos.x = index2let +j;
+                    if(map[i][j])
+                    {
+                        disp_write(pos, D_ON);
+                    }
+                    disp_update();	
                 }
-                disp_update();	
+            }
+            index2let += j + 1;
+            len++;
+        }
+
+        pos.y = 0;
+        pos.x = 7;
+        disp_write(pos, D_ON);
+        pos.y = 15;
+        disp_write(pos, D_ON);
+
+        pos.y = 1;
+        pos.x = 6;
+        disp_write(pos, D_ON);
+        pos.y = 14;
+        disp_write(pos, D_ON);
+
+        pos.y = 1;
+        pos.x = 8;
+        disp_write(pos, D_ON);
+        pos.y = 14;
+        disp_write(pos, D_ON);
+
+
+        for(j = 0; j < 15; j++)
+        {
+            pos.y = 4;
+            pos.x = j;
+            disp_write(pos, D_ON);
+            pos.y = 12;
+            disp_write(pos, D_ON);
+        }
+        disp_update();
+
+        while (prev == sim->key_pressed)        //hasta que no hagas click o cambies de opcion, no repinto el mapa
+        {
+            if(sim->menu_status!= PAUSE_MENU)
+            {
+                break;
             }
         }
-        index2let += j + 1;
-        len++;
+        prev = sim->key_pressed;
+        
     }
-
-    pos.y = 0;
-    pos.x = 7;
-    disp_write(pos, D_ON);
-    pos.y = 15;
-    disp_write(pos, D_ON);
-
-    pos.y = 1;
-    pos.x = 6;
-    disp_write(pos, D_ON);
-    pos.y = 14;
-    disp_write(pos, D_ON);
-
-    pos.y = 1;
-    pos.x = 8;
-    disp_write(pos, D_ON);
-    pos.y = 14;
-    disp_write(pos, D_ON);
-
-
-    for(j = 0; j < 15; j++)
-    {
-        pos.y = 4;
-        pos.x = j;
-        disp_write(pos, D_ON);
-        pos.y = 12;
-        disp_write(pos, D_ON);
-    }
-    disp_update();
-    
-    
-    usleep(2500000);
+if(sim->key_pressed == 0)
+{
     sim->menu_status = GAME;
-    return;
+}
+else if(sim->key_pressed == 1)
+{
+    sim->menu_status = GAME;
+}
+if(sim->key_pressed == 2)
+{
+    sim->menu_status = GAME;
+}
+return;
 }
 
 static void letterToMat(int map[5][3], char letter)
@@ -259,6 +358,18 @@ static void letterToMat(int map[5][3], char letter)
         map[3][1] = 1;
         map[4][1] = 1;
     }
+    else if(letter == 'L')
+    {
+        map[0][0] = 1;
+        map[1][0] = 1;
+        map[2][0] = 1;
+        map[3][0] = 1;
+        map[4][0] = 1;
+
+        map[4][1] = 1;
+
+        map[4][2] = 1;
+    }
     else if(letter == 'O')
     {
         map[0][0] = 1;
@@ -275,6 +386,21 @@ static void letterToMat(int map[5][3], char letter)
         map[2][2] = 1;
         map[3][2] = 1;
         map[4][2] = 1;
+    }
+    else if(letter == 'P')
+    {
+        map[0][0] = 1;
+        map[1][0] = 1;
+        map[2][0] = 1;
+        map[3][0] = 1;
+        map[4][0] = 1;
+
+        map[0][1] = 1;
+        map[2][1] = 1;
+
+        map[0][2] = 1;
+        map[1][2] = 1;
+        map[2][2] = 1;
     }
     else if(letter == 'R')
     {
@@ -331,6 +457,20 @@ static void letterToMat(int map[5][3], char letter)
 
         map[0][2] = 1;
         map[4][2] = 1;
+    }
+    else if(letter == 'Y')
+    {
+        map[0][0] = 1;
+        map[1][0] = 1;
+        map[2][0] = 1;
+
+        map[2][1] = 1;
+        map[3][1] = 1;
+        map[4][1] = 1;
+
+        map[0][2] = 1;
+        map[1][2] = 1;
+        map[2][2] = 1;
     }
 
     return;

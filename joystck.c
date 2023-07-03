@@ -31,6 +31,7 @@ while(sim->running)
 	dcoord_t npos = pos;							//npos es la próxima posición
 	joyinfo_t coord = {0,0,J_NOPRESS};							//coordenadas medidas del joystick
     dcoord_t ps;
+	sim->key_pressed = 0;		// 0: PLAY, 1: EXIT,  2: RESTART
 
     //EL siguiente bloque se encarga de la lectura del joystick, 
     //como tambien de borrar el led que prendio previamente la rana
@@ -38,40 +39,63 @@ while(sim->running)
 	int i= 0;
 	do
 	{
-		while(sim->menu_status != GAME);		//Si no esta jugando, no modifiques las coordenadas
 		i++;
 		coord = joy_read();	//Guarda las coordenadas medidas
 		ps.x =  sim->objetos[FROG].x[0];
         ps.y = sim->objetos[FROG].y;
 
+		if(coord.sw != J_NOPRESS && sim->menu_status == PAUSE_MENU)
+		{
+			sim->menu_status = 0;
+		}
         //printf("X: %f   Y:   %f\n", (float)sim->objetos[FROG].x[0], (float)sim->objetos[FROG].y);
 		//Establece la próxima posición según las coordenadas medidas
 		if(coord.x > THRESHOLD && sim->objetos[FROG].x[0] < DISP_MAX_X)
 		{
             printf("derecha\n");
-            disp_write(ps, D_OFF);		
-            sim->objetos[FROG].x[0]++;
+			if(sim->menu_status == GAME)
+			{
+				disp_write(ps, D_OFF);		
+				sim->objetos[FROG].x[0]++;
+			}		
             usleep(500000);
 		}
 		if(coord.x < -THRESHOLD && sim->objetos[FROG].x[0] > DISP_MIN)
 		{
             printf("izquierda\n");
-            disp_write(ps, D_OFF);		
-			sim->objetos[FROG].x[0]--;
+			if(sim->menu_status == GAME)
+			{
+				disp_write(ps, D_OFF);		
+				sim->objetos[FROG].x[0]--;
+			}
             usleep(500000);
 		}
 		if(coord.y > THRESHOLD && sim->objetos[FROG].y > DISP_MIN)
 		{
             printf("arriba\n");
-            disp_write(ps, D_OFF);		
-			sim->objetos[FROG].y--;
+			if(sim->menu_status == GAME)
+			{
+          	  	disp_write(ps, D_OFF);		
+				sim->objetos[FROG].y--;
+			}
+			else if(sim->menu_status == PAUSE_MENU && sim->key_pressed != 2)
+			{
+				sim->key_pressed++;
+			}
             usleep(500000);
 		}
 		if(coord.y < -THRESHOLD && sim->objetos[FROG].y < DISP_MAX_Y)
 		{
             printf("abajo\n");
-            disp_write(ps, D_OFF);		
-			sim->objetos[FROG].y++;
+			if(sim->menu_status == GAME)
+			{
+				disp_write(ps, D_OFF);		
+				sim->objetos[FROG].y++;
+			}
+			else if(sim->menu_status == PAUSE_MENU && sim->key_pressed != 0)
+			{
+				sim->key_pressed--;
+			}
             usleep(500000);
 		}
 
