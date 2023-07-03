@@ -40,8 +40,16 @@ void gameOver(world_t* sim)
         resetBitmaps(sim);
     #endif
     //sim->running = !sim->running;
-    free_memory(sim, 0);
-    initialize_objects(sim);
+    sim->nivel = 0;
+
+    //Lo siguiente habria que hacerlo tambien en allegro, lo comento con raspi solo para que no haya problema 
+    //de comunicacion entre threads. Habria que asegurarse que mientras se libere la memoria nadei acceda
+    // ni a las posiciones de los autos ni de las ranas. EN la rpi ya lo tengo asegurado eso.
+    #ifdef RASPI
+        free_memory(sim, 0);
+        initialize_objects(sim);
+    #endif
+
 
 }
 

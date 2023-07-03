@@ -10,7 +10,6 @@
 
 
 static void dibujar_objeto(int macro_type, world_t* sim);
-static void borrarLinea(int i, world_t* sim);
 static void pausa(world_t* sim);
 static void letterToMat(int map[5][3], char letter);
 
@@ -23,14 +22,104 @@ void* display(void* simPtrPtr)
     disp_init();
     disp_clear();
     disp_update();
+    sim->menu_status = MAIN_MENU;
+
+    int titilar = 0;
+    sim->key_pressed = 0;
+    int prev = sim->key_pressed;
+    sim->redraw=0;
 
 while(sim->running)
 {
-    int titilar = 0;
+    while (sim->menu_status == MAIN_MENU)       //MENU PRINCIPAL
+    {
+        disp_clear();
 
+        char word[4];
+        char game[4] = {'G', 'A', 'M', 'E'};
+
+       if(sim->key_pressed == 0 )   // 0: PLAY, 1: EXIT,  2: RESTART
+        {
+            word[0] = 'P';
+            word[1] = 'L';
+            word[2] = 'A';
+            word[3] = 'Y';
+        }
+        else if(sim->key_pressed == 1)
+        {
+            word[0] = 'E';
+            word[1] = 'X';
+            word[2] = 'I';
+            word[3] = 'T';
+        }
+        else if(sim->key_pressed == 2)
+        {
+            word[0] = 'P';
+            word[1] = 'U';
+            word[2] = 'T';
+            word[3] = 'O';
+        }
+
+        //por defecto las letras arrancan desde la fila 14
+        int index2let = 1;
+        int i,j;
+        int map[5][3];
+
+        dcoord_t pos;
+
+        int len = 0;
+        for(len = 0; len < 4; len++)
+        {
+            letterToMat(map, word[len]);
+
+            for (j = 0; j < 3; j++)
+            {
+                for(i = 0; i < 5; i++)
+                {
+                    pos.y = 0 +i;
+                    pos.x = index2let +j;
+                    if(map[i][j])
+                    {
+                        disp_write(pos, D_ON);
+                    }
+                    disp_update();	
+                }
+            }
+            index2let += j + 1;
+        }
+        index2let = 1; 
+        for(len = 0; len < 4; len++)
+        {
+            letterToMat(map, game[len]);
+
+            for (j = 0; j < 3; j++)
+            {
+                for(i = 0; i < 5; i++)
+                {
+                    pos.y = 7 +i;
+                    pos.x = index2let +j;
+                    if(map[i][j])
+                    {
+                        disp_write(pos, D_ON);
+                    }
+                    disp_update();	
+                }
+            }
+            index2let += j + 1;
+        }
+
+        while (prev == sim->key_pressed)        //hasta que no hagas click o cambies de opcion, no repinto el mapa
+        {
+            if(sim->menu_status!= MAIN_MENU)
+            {
+                break;
+            }
+        }
+        prev = sim->key_pressed;
+    }
+
+    usleep(450000/2);
     
-    sim->menu_status = GAME;
-    sim->redraw=0;
 
     while(sim->menu_status == GAME && !sim->redraw)//sim->running == ON)  Si se esta jugando y no se esta reasignando cosas
     {                                       
@@ -43,7 +132,6 @@ while(sim->running)
         {
             if(sim->lives>0)
             {
-                //borrarLinea(i, sim);
                 dibujar_objeto(i, sim);
             }
         }
@@ -121,21 +209,21 @@ while(sim->running)
         }
         
     }
+    //YA sali del game, tas en pausa
     if(sim->menu_status == PAUSE_MENU)
     {
         pausa(sim);
-
-        printf("ESCAPE\n");
-        sim->running = !sim->running;
+        usleep(200000);
     }
 }
     disp_clear();
     disp_update();
+    return NULL;
 }
 
 void dibujar_objeto(int macro_type, world_t* sim)		
 {
-    int j,k,l, m;
+    int j,k,l;
     dcoord_t pos;
     for(l = 0; l < 16; l++)
     {
@@ -172,21 +260,6 @@ void dibujar_objeto(int macro_type, world_t* sim)
 }
 
 
-void borrarLinea(int i, world_t* sim)		
-{
-	int u;	
-
-	for(u=0;u<16;u++)				//apaga todos los leds de la linea i
-	{
-	dcoord_t pos2 = { u ,sim->objetos[i].y};
-				
-	disp_write(pos2, D_OFF);	
-    	
-	}
-
-	return;
-}
-
 static void pausa(world_t* sim)
 {
     int prev = sim->key_pressed;
@@ -213,22 +286,22 @@ static void pausa(world_t* sim)
         }
         else if(sim->key_pressed == 1)
         {
-            word[0] = 'E';
-            word[1] = 'X';
-            word[2] = 'I';
-            word[3] = 'T';
+            word[0] = 'M';
+            word[1] = 'E';
+            word[2] = 'N';
+            word[3] = 'U';
         }
         else if(sim->key_pressed == 2)
         {
-            word[0] = 'L';
-            word[1] = 'U';
-            word[2] = 'L';
-            word[3] = 'A';
+            word[0] = 'R';
+            word[1] = 'S';
+            word[2] = 'E';
+            word[3] = 'T';
         }
 
 
         int len = 0;
-        while (len <4)
+        for(len = 0; len < 4; len++)
         {
             letterToMat(map, word[len]);
 
@@ -246,7 +319,6 @@ static void pausa(world_t* sim)
                 }
             }
             index2let += j + 1;
-            len++;
         }
 
         pos.y = 0;
@@ -288,19 +360,7 @@ static void pausa(world_t* sim)
         prev = sim->key_pressed;
         
     }
-if(sim->key_pressed == 0)
-{
-    sim->menu_status = GAME;
-}
-else if(sim->key_pressed == 1)
-{
-    sim->menu_status = GAME;
-}
-if(sim->key_pressed == 2)
-{
-    sim->menu_status = GAME;
-}
-return;
+    return;
 }
 
 static void letterToMat(int map[5][3], char letter)
@@ -372,12 +432,62 @@ static void letterToMat(int map[5][3], char letter)
 
         map[0][2] = 1;
     }
+    else if(letter == 'G')
+    {
+        map[0][0] = 1;
+        map[1][0] = 1;
+        map[2][0] = 1;
+        map[3][0] = 1;
+        map[4][0] = 1;
+
+        map[0][1] = 1;
+        map[2][1] = 1;
+        map[4][1] = 1;
+
+        map[0][2] = 1;
+        map[2][2] = 1;
+        map[3][2] = 1;
+        map[4][2] = 1;
+    }
     else if(letter == 'I')
     {
         map[0][1] = 1;
         map[2][1] = 1;
         map[3][1] = 1;
         map[4][1] = 1;
+    }
+    else if(letter == 'M')
+    {
+        map[0][0] = 1;
+        map[1][0] = 1;
+        map[2][0] = 1;
+        map[3][0] = 1;
+        map[4][0] = 1;
+
+        map[1][1] = 1;
+
+        map[0][2] = 1;
+        map[1][2] = 1;
+        map[2][2] = 1;
+        map[3][2] = 1;
+        map[4][2] = 1;
+    }
+    else if(letter == 'N')
+    {
+        map[0][0] = 1;
+        map[1][0] = 1;
+        map[2][0] = 1;
+        map[3][0] = 1;
+        map[4][0] = 1;
+
+        map[2][1] = 1;
+        map[3][1] = 1;
+
+        map[0][2] = 1;
+        map[1][2] = 1;
+        map[2][2] = 1;
+        map[3][2] = 1;
+        map[4][2] = 1;
     }
     else if(letter == 'L')
     {
@@ -437,6 +547,22 @@ static void letterToMat(int map[5][3], char letter)
 
         map[0][2] = 1;
         map[1][2] = 1;
+        map[4][2] = 1;
+    }
+    else if(letter == 'S')
+    {
+        map[0][0] = 1;
+        map[1][0] = 1;
+        map[2][0] = 1;
+        map[4][0] = 1;
+
+        map[0][1] = 1;
+        map[2][1] = 1;
+        map[4][1] = 1;
+
+        map[0][2] = 1;
+        map[2][2] = 1;
+        map[3][2] = 1;
         map[4][2] = 1;
     }
     else if(letter == 'T')

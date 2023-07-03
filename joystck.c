@@ -12,6 +12,7 @@
 #include "sim.h"
 #include "dispRaspi.h"
 #include "backEnd.h"
+#include "winCond.h"
 
 
 #define THRESHOLD 40	//Límite a partir del cual se mueve el LED encendido
@@ -27,8 +28,6 @@ void* joystick(void* simPtrPtr)
 
 while(sim->running)
 {
-	dcoord_t pos = {DISP_MAX_X>>1 , DISP_MAX_Y>>1};	//pos es la posición actual, empieza en el centro de la matriz
-	dcoord_t npos = pos;							//npos es la próxima posición
 	joyinfo_t coord = {0,0,J_NOPRESS};							//coordenadas medidas del joystick
     dcoord_t ps;
 	sim->key_pressed = 0;		// 0: PLAY, 1: EXIT,  2: RESTART
@@ -46,7 +45,34 @@ while(sim->running)
 
 		if(coord.sw != J_NOPRESS && sim->menu_status == PAUSE_MENU)
 		{
-			sim->menu_status = 0;
+			if(sim->key_pressed == 0)
+			{
+				sim->menu_status = GAME;
+			}
+			else if(sim->key_pressed == 1)
+			{
+				sim->menu_status = MAIN_MENU;
+				gameOver(sim);
+				resetFrog(sim);
+			}
+			if(sim->key_pressed== 2)
+			{
+				sim->menu_status = GAME;
+			}
+			usleep(200000);
+		}
+		else if(coord.sw != J_NOPRESS && sim->menu_status == MAIN_MENU)
+		{
+			if(sim->key_pressed == 0 || sim->key_pressed == 2)
+			{
+				sim->menu_status = GAME;    //Se presiono play
+			}
+			else if(sim->key_pressed == 1)
+			{
+				sim->running = 0;
+				sim->menu_status = 0;
+			}
+			usleep(200000);
 		}
         //printf("X: %f   Y:   %f\n", (float)sim->objetos[FROG].x[0], (float)sim->objetos[FROG].y);
 		//Establece la próxima posición según las coordenadas medidas
@@ -78,9 +104,9 @@ while(sim->running)
           	  	disp_write(ps, D_OFF);		
 				sim->objetos[FROG].y--;
 			}
-			else if(sim->menu_status == PAUSE_MENU && sim->key_pressed != 2)
+			else if((sim->menu_status == MAIN_MENU || sim->menu_status == PAUSE_MENU )&& sim->key_pressed != 2)
 			{
-				sim->key_pressed++;
+				sim->key_pressed++;		//si estoy en algun menu cambio la opcion
 			}
             usleep(500000);
 		}
@@ -92,15 +118,16 @@ while(sim->running)
 				disp_write(ps, D_OFF);		
 				sim->objetos[FROG].y++;
 			}
-			else if(sim->menu_status == PAUSE_MENU && sim->key_pressed != 0)
+			else if((sim->menu_status == MAIN_MENU || sim->menu_status == PAUSE_MENU ) && sim->key_pressed != 0)
 			{
 				sim->key_pressed--;
 			}
             usleep(500000);
 		}
 
-	} while(coord.sw == J_NOPRESS && sim->running );	//termina si se presiona el switch
+	} while(sim->running );	//termina si se presiona el switch
 
 
 }
+return NULL;
 }

@@ -234,6 +234,12 @@ void move_objects(world_t* sim)
 
         rePositionFrog(sim);
         sim->lives = CANT_DE_VIDAS;
+        //**************************************************************************************************
+        //Aca podria llamar freememory e initialize objects para reinicializar todo en el nuevo nivel.
+        //Lo bueno es que al estar dentro de move objects, me aseguro que nadei va a mvoer a los autos
+        //SOlo queda asegurar que nadie mueva a la rana por teclado, esto en la raspi lo hare haciendo un falso 
+        //switch al menu de pausa (BLOQUEA AL JOYSTICK)
+        //*********************************************************************************************************
         //ya junte 5 ranas paso de nivel
         //llamar a initialize objetcs si todo anda bien, asi se ve reflejado el cambio
         // (deberian cambiar los vehiculos y aumentr 5% las velocidades progresivamente en cad nivel)
@@ -383,4 +389,5 @@ float round_if(float n, float speed)
             return n + 1;
         }
     }
+    return n;
 }
