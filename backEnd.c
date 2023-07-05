@@ -31,7 +31,7 @@ void initialize_objects(world_t* sim)
 {
     srand(time(0));
 
-    sim->lives = 3;
+    sim->lives = CANT_DE_VIDAS;
     if(sim->nivel == 0)
     {
         sim->points = 0;
@@ -55,15 +55,21 @@ void initialize_objects(world_t* sim)
     
     int squares_cant[OBJ_MAX] = {1,1,1,1,1,2,3,3,3,3};
     
-    int j;
+    int i, j;
     if(sim->nivel >= 1)
     {
         for(j = 1; j < OBJ_MAX; j++)
         {
-            speed[j] = speed[j] + (0.25)*(sim->nivel)*speed[j]; //incremetno de 25% en la velocidad
+            int max = rand()%1 +1;
+            int sign = 1;
+            for(i = 0; i < max; i++)
+            {
+                sign *= -1;
+            }
+            speed[j] = sign* (speed[j] + (0.5)*(sim->nivel)*speed[j]); //incremetno de 25% en la velocidad
             if(j <= TRUCK && j != CAR3)
             {
-                screen_rep[j] = rand() %5;
+                screen_rep[j] = rand() %3 + 1;
             }            
             else if(j == CAR3)
             {
@@ -75,8 +81,6 @@ void initialize_objects(world_t* sim)
             }
         }
     }
-
-    int i;
     for(i = 1; i < OBJ_MAX; i++)
     {
         sim->objetos[i].separation = separation[i];
@@ -99,7 +103,7 @@ void initialize_objects(world_t* sim)
             }
             else
             {
-                sim->objetos[i].screen_rep = 15;
+                sim->objetos[i].screen_rep = 7;
             }
                 
         }
@@ -151,7 +155,7 @@ void initialize_objects(world_t* sim)
     /***************************************/
     #endif
 
-    printf("Se inicilizaron todos los objetos correctamente\n");
+    printf("Se inicilizaron todos los objetos correctamente en el nivel\t%d\n", sim->nivel);
     
     return;
 }
@@ -229,11 +233,18 @@ void move_objects(world_t* sim)
         sim->lily[5] = 0;
         sim->points +=100;
 
-        if(sim->lives<3)        //suma una vida , limite de 3 maximas
-            sim->lives++;
-
         rePositionFrog(sim);
         sim->lives = CANT_DE_VIDAS;
+
+        #ifdef RASPI
+            free_memory(sim, 0);
+            initialize_objects(sim);
+            if(sim->nivel > 3)
+            {
+                sim->menu_status = MAIN_MENU;
+                sim->key_pressed = WIN; //indica q el jugador perdio
+            }
+        #endif
         //**************************************************************************************************
         //Aca podria llamar freememory e initialize objects para reinicializar todo en el nuevo nivel.
         //Lo bueno es que al estar dentro de move objects, me aseguro que nadei va a mvoer a los autos

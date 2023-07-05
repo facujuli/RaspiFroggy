@@ -36,7 +36,7 @@
     } selection_t;
 
     enum ON_OFF {OFF = 0, ON = 1};
-    enum MENUS {GAME = 20, MAIN_MENU, NICKNAME_MENU, HALL_OF_FAME_MENU, CHOOSE_FROG_MENU, PAUSE_MENU };
+    enum MENUS {GAME = 20, MAIN_MENU, NICKNAME_MENU, HALL_OF_FAME_MENU, CHOOSE_FROG_MENU, PAUSE_MENU, GAMEOVER, WIN};
     
     #define OBJ_MAX 10      //cant maxima de objets
     enum MYOBJECTS          //macros asociadas a los objetos

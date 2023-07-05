@@ -41,6 +41,10 @@ void gameOver(world_t* sim)
     #endif
     //sim->running = !sim->running;
     sim->nivel = 0;
+    #ifdef RASPI
+        sim->menu_status = MAIN_MENU;
+        sim->key_pressed = GAMEOVER; //indica q el jugador perdio
+    #endif
 
     //Lo siguiente habria que hacerlo tambien en allegro, lo comento con raspi solo para que no haya problema 
     //de comunicacion entre threads. Habria que asegurarse que mientras se libere la memoria nadei acceda

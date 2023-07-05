@@ -75,10 +75,14 @@ int main(void)
     pthread_t t1,t2  ;
     pthread_create(&t2, NULL, &joystick, (void*)simPtrPtr);
     pthread_create(&t1, NULL, &display, (void*)simPtrPtr);
-    //pthread_create(&t1, NULL, &keyboard, (void*)simPtrPtr);
+    #ifndef RASPI
+    pthread_create(&t1, NULL, &keyboard, (void*)simPtrPtr);
+    #endif
     pthread_join(t2,NULL);
     pthread_join(t1,NULL); 
-   // pthread_join(t1,NULL);  
+    #ifndef RASPI
+    pthread_join(t1,NULL);  
+    #endif
     
 
     free_memory(&sim, 1);

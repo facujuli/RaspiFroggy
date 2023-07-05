@@ -48,16 +48,19 @@ while(sim->running)
 			if(sim->key_pressed == 0)
 			{
 				sim->menu_status = GAME;
+				sim->key_pressed = 0;
 			}
 			else if(sim->key_pressed == 1)
 			{
 				sim->menu_status = MAIN_MENU;
 				gameOver(sim);
 				resetFrog(sim);
+				sim->key_pressed = 0;
 			}
 			if(sim->key_pressed== 2)
 			{
 				sim->menu_status = GAME;
+				sim->key_pressed = 0;
 			}
 			usleep(200000);
 		}
@@ -66,11 +69,13 @@ while(sim->running)
 			if(sim->key_pressed == 0 || sim->key_pressed == 2)
 			{
 				sim->menu_status = GAME;    //Se presiono play
+				sim->key_pressed = 0;
 			}
 			else if(sim->key_pressed == 1)
 			{
 				sim->running = 0;
 				sim->menu_status = 0;
+				sim->key_pressed = 0;
 			}
 			usleep(200000);
 		}
