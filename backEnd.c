@@ -101,10 +101,10 @@ void initialize_objects(world_t* sim)
             {
                 sim->objetos[i].screen_rep = 0;
             }
-            else
+            /*else
             {
                 sim->objetos[i].screen_rep = 7;
-            }
+            }*/
                 
         }
         #endif
@@ -236,13 +236,17 @@ void move_objects(world_t* sim)
         rePositionFrog(sim);
         sim->lives = CANT_DE_VIDAS;
 
+        /*CAMBIO DE NIVEL:  en Allegro deberia funcionar EXACTAMENTE igual, salvo lo del menu_status y lo del key_pressed
+        (eso ni idea como funciona en allegro, yo eso lo puse para saber que el jugador gano yque me muestre el menu principal)
+        Hacé el analogo vos a tu code y bloquealo con ifndef raspi, y el mio dejalo protegido con ifdef raspi. Esos ifdefs a la hora
+        de entregar el codigo los enbellecemos un poco.*/
         #ifdef RASPI
             free_memory(sim, 0);
             initialize_objects(sim);
             if(sim->nivel > 3)
             {
                 sim->menu_status = MAIN_MENU;
-                sim->key_pressed = WIN; //indica q el jugador perdio
+                sim->key_pressed = WIN; //indica q el jugador GANO
             }
         #endif
         //**************************************************************************************************

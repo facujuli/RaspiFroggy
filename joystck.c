@@ -108,6 +108,7 @@ while(sim->running)
 			{
           	  	disp_write(ps, D_OFF);		
 				sim->objetos[FROG].y--;
+				sim->objetos[FROG].speed = 0;
 			}
 			else if((sim->menu_status == MAIN_MENU || sim->menu_status == PAUSE_MENU )&& sim->key_pressed != 2)
 			{
@@ -122,6 +123,7 @@ while(sim->running)
 			{
 				disp_write(ps, D_OFF);		
 				sim->objetos[FROG].y++;
+				sim->objetos[FROG].speed = 0;
 			}
 			else if((sim->menu_status == MAIN_MENU || sim->menu_status == PAUSE_MENU ) && sim->key_pressed != 0)
 			{
