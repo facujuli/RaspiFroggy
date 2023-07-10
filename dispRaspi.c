@@ -30,7 +30,7 @@ void* display(void* simPtrPtr)
     disp_clear();
     disp_update();
 
-    saludar();
+    //saludar();
 
     sim->menu_status = MAIN_MENU;
 
@@ -87,11 +87,8 @@ void* display(void* simPtrPtr)
             }
             else if( sim->key_pressed == WIN)
             {
-                word[0] = 'U';
-                word[1] = 'I';
-                word[2] = 'N';
-                imprimirWord(2, 4, 1, word);
-                imprimirWord(4, 4, 3, word);
+                char word[] = {'c','o','n','g','r','a','t','u','l','a','t','i','o','n','s','!'};
+                imprimirSentencia(word, sizeof(word), 0, 5, 1);
                 sim->key_pressed = 0;
                 usleep(2000000);
                 disp_clear();
@@ -219,7 +216,14 @@ void* display(void* simPtrPtr)
             ps.x = sim->objetos[FROG].x[0]; 
             ps.y = sim->objetos[FROG].y;
 
-            disp_write(ps, titilar%2);		//prende el led si titilar es par.
+            if(sim->objetos[FROG].y > sim->objetos[TORTU1].y)   //Si no está en la zona de botes
+            {
+                disp_write(ps, titilar%2);		//hago titilar al led (titilar%2 oscila entre 0 y 1)
+            }
+            else
+            {
+                disp_write(ps, titilar%2);		//hago titilar al led (titilar%2 oscila entre 0 y 1)//disp_write(ps, 1);		//prende el led siempre
+            }
             
                 
             disp_update();			//actualiza el display 
@@ -229,15 +233,8 @@ void* display(void* simPtrPtr)
                 move_objects(sim);
             }
                 
-            usleep(130000);
+            usleep(50000);
 
-            
-            if(coord.sw != J_NOPRESS)
-            {
-                sim->menu_status = PAUSE_MENU;
-                usleep(200000);
-            }
-            
         }
         //YA sali del game, tas en pausa
         if(sim->menu_status == PAUSE_MENU)
@@ -899,7 +896,7 @@ static void imprimirSentencia(char oracion[32], int size, int x, int y, int rep)
     }
     int i, j;
     char c;
-    for(i = 0; i < size*rep - 4; i++)       //el -4 evita que la ultima palabra termine cortado ( 4 es la cant maxima d caracteres en pantalla)
+    for(i = 0; i < size*rep - 3; i++)       //el -3 evita que la ultima palabra termine cortado ( 4 es la cant maxima d caracteres en pantalla)
         {
             disp_clear();
             imprimirWord(x, y, 4, oracion);
@@ -920,19 +917,16 @@ static void saludar(void)
     char ingrese[] = {'i','n','g','r','e','s','e',' ','s','u',' ','n','o','m','b','r','e',' '};
     imprimirSentencia(ingrese, sizeof(ingrese) + 1, 0, 5, 1);
 
-    char saludo[32];    // 12 CARACTERES PARA "BIENVENIDO", 20 PARA EL NOMBRE DEL PJ
+    char saludo[29];    // 9 CARACTERES PARA "WELCOME", 20 PARA EL NOMBRE DEL PJ
     saludo[0] = ' ';
-    saludo[1] = 'B';
-    saludo[2] = 'I';    
-    saludo[3] = 'E';    
-    saludo[4] = 'N';    
-    saludo[5] = 'V';  
-    saludo[6] = 'E';    
-    saludo[7] = 'N';    
-    saludo[8] = 'I';    
-    saludo[9] = 'D';    
-    saludo[10] = 'O';
-    saludo[11] = ' ';        
+    saludo[1] = 'w';
+    saludo[2] = 'e';    
+    saludo[3] = 'l';    
+    saludo[4] = 'c';    
+    saludo[5] = 'o';  
+    saludo[6] = 'm';    
+    saludo[7] = 'e';    
+    saludo[8] = ' ';     
 
     
     char input = 0;
@@ -940,7 +934,7 @@ static void saludar(void)
     while(input != '\n' && len < 20)
     {
         input = getchar();
-        saludo[12 + len] = input;
+        saludo[9 + len] = input;
         len++;
         
     }

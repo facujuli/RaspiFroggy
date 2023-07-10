@@ -16,7 +16,8 @@
 
 
 #define THRESHOLD 40	//Límite a partir del cual se mueve el LED encendido
-
+#define MOVE_RATE 350000		//delay asociado a la lectura del movimiento de la rana
+#define OPTION_RATE 400000		//delay asociado a la deteccion de una seleccion de opcion de menu, o cambio de menu
 
 void* joystick(void* simPtrPtr)
 {
@@ -43,7 +44,7 @@ while(sim->running)
 		ps.x =  sim->objetos[FROG].x[0];
         ps.y = sim->objetos[FROG].y;
 
-		if(coord.sw != J_NOPRESS && sim->menu_status == PAUSE_MENU)
+		if(coord.sw != J_NOPRESS && sim->menu_status == PAUSE_MENU)		//apreto el joystick en menu de pausa
 		{
 			if(sim->key_pressed == 0)
 			{
@@ -62,9 +63,15 @@ while(sim->running)
 				sim->menu_status = GAME;
 				sim->key_pressed = 0;
 			}
-			usleep(200000);
+			usleep(OPTION_RATE);
 		}
-		else if(coord.sw != J_NOPRESS && sim->menu_status == MAIN_MENU)
+		else if (coord.sw != J_NOPRESS && sim->menu_status == GAME) //apreto el joystick jugando
+		{
+			sim->menu_status = PAUSE_MENU;
+            usleep(OPTION_RATE);
+		}
+		
+		else if(coord.sw != J_NOPRESS && sim->menu_status == MAIN_MENU)	//apreto el analogico en menu principal
 		{
 			if(sim->key_pressed == 0 || sim->key_pressed == 2)
 			{
@@ -77,59 +84,57 @@ while(sim->running)
 				sim->menu_status = 0;
 				sim->key_pressed = 0;
 			}
-			usleep(200000);
+			usleep(OPTION_RATE);
 		}
-        //printf("X: %f   Y:   %f\n", (float)sim->objetos[FROG].x[0], (float)sim->objetos[FROG].y);
 		//Establece la próxima posición según las coordenadas medidas
 		if(coord.x > THRESHOLD && sim->objetos[FROG].x[0] < DISP_MAX_X)
 		{
-            printf("derecha\n");
 			if(sim->menu_status == GAME)
 			{
 				disp_write(ps, D_OFF);		
 				sim->objetos[FROG].x[0]++;
+				usleep(MOVE_RATE);
 			}		
-            usleep(500000);
 		}
 		if(coord.x < -THRESHOLD && sim->objetos[FROG].x[0] > DISP_MIN)
 		{
-            printf("izquierda\n");
 			if(sim->menu_status == GAME)
 			{
 				disp_write(ps, D_OFF);		
 				sim->objetos[FROG].x[0]--;
+				usleep(MOVE_RATE);
 			}
-            usleep(500000);
 		}
 		if(coord.y > THRESHOLD && sim->objetos[FROG].y > DISP_MIN)
 		{
-            printf("arriba\n");
 			if(sim->menu_status == GAME)
 			{
           	  	disp_write(ps, D_OFF);		
 				sim->objetos[FROG].y--;
 				sim->objetos[FROG].speed = 0;
+				usleep(MOVE_RATE);
 			}
 			else if((sim->menu_status == MAIN_MENU || sim->menu_status == PAUSE_MENU )&& sim->key_pressed != 2)
 			{
 				sim->key_pressed++;		//si estoy en algun menu cambio la opcion
+				usleep(OPTION_RATE);
 			}
-            usleep(500000);
+            
 		}
 		if(coord.y < -THRESHOLD && sim->objetos[FROG].y < DISP_MAX_Y)
 		{
-            printf("abajo\n");
 			if(sim->menu_status == GAME)
 			{
 				disp_write(ps, D_OFF);		
 				sim->objetos[FROG].y++;
 				sim->objetos[FROG].speed = 0;
+				usleep(MOVE_RATE);
 			}
 			else if((sim->menu_status == MAIN_MENU || sim->menu_status == PAUSE_MENU ) && sim->key_pressed != 0)
 			{
 				sim->key_pressed--;
+				usleep(OPTION_RATE);
 			}
-            usleep(500000);
 		}
 
 	} while(sim->running );	//termina si se presiona el switch

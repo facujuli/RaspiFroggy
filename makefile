@@ -1,13 +1,15 @@
 # Cómo compilar ejemplos:
 
-all: testDisp testJoy testLibraries
+main: main.c backEnd.o dispRaspi.o joystck.o winCond.o
 
-testDisp: testDisp.c disdrv.o disdrv.h
-	gcc testDisp.c disdrv.o -o testDisp -Wall
+backEnd.o: backEnd.c backEnd.h
 
-testJoy: testJoy.c joydrv.o joydrv.h
-	gcc testJoy.c joydrv.o -o testJoy -Wall
+dispRaspi.o: dispRaspi.c dispRaspi.h
 
-testLibraries: testLibraries.c joydrv.o joydrv.h disdrv.o disdrv.h
-	gcc testLibraries.c joydrv.o disdrv.o -o testLibraries -Wall
+joystck.o: joystck.c joystck.h
+
+winCond.o: winCond.c winCond.h
+
+deuna: main.c backEnd.c backEnd.h winCond.c winCond.h joystck.c joystck.h dispRaspi.c dispRaspi.h
+	gcc -o juegazo main.c backEnd.c winCond.c joystck.c dispRaspi.c disdrv.o joydrv.o -lpthread -Wall -D RASPI
 

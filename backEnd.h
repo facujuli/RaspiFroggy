@@ -16,7 +16,6 @@
 
     #include "sim.h"
 
-    #define VEL(v) ((v)*(3.0/60)/20.0)
     #define MIN_SEP_CAR 2       //separacion minima que deben tener los coches entre si
     #define MIN_SEP_TRUCK 3     //separacion minima que deben tener los camiones entre si
     #define MIN_SEP_BOAT 5      //separacion minima que deben tener los botes entre si

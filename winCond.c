@@ -18,6 +18,7 @@ void rePositionFrog(world_t* sim)
     sim->objetos[FROG].x[0] = 8;                
     sim->objetos[FROG].y = 14;
     sim->lives--;    
+    sim->objetos[FROG].speed = 0;
     return; 
 }
 
@@ -27,6 +28,7 @@ void resetFrog(world_t* sim)
     sim->objetos[FROG].y = 14;
     sim->lives = CANT_DE_VIDAS;
     sim->points = 0;
+    sim->objetos[FROG].speed = 0;
 }
 
 void gameOver(world_t* sim)

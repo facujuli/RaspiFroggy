@@ -13,6 +13,16 @@
 #include <stdlib.h>
 #include "stdio.h"
 
+#define VEL(v) ((v)*(3.0/60)/20.0)
+
+#ifdef RASPI
+    #define X_CAR_SPEED 30
+    #define X_BOAT_SPEED 6
+#else
+    #define X_CAR_SPEED 1
+    #define X_BOAT_SPEED 1
+#endif
+
 void free_memory(world_t *sim, int flag)
 {
     int i;
@@ -39,21 +49,28 @@ void initialize_objects(world_t* sim)
     
 
     sim->lily[0] = 0;
-    sim->lily[1] = 0;
-    sim->lily[2] = 0;
-    sim->lily[3] = 0;
-    sim->lily[4] = 0;
-    sim->lily[5] = 0;
+    sim->lily[1] = 1;
+    sim->lily[2] = 1;
+    sim->lily[3] = 1;
+    sim->lily[4] = 1;
+    sim->lily[5] = 1;
 
-    float speed[OBJ_MAX] = {VEL(5), VEL(5), VEL(5), -VEL(9), -VEL(5),VEL(5), -VEL(5), VEL(5), -VEL(5), VEL(5)};     //Arreglo que contendrá en cada columna las respectivas velocidades de los objetos.
-                                                                                                                    //cada fila representará un nivel distinto
-    int separation[OBJ_MAX] = { 0, 4, 4, 9, 4, 5, 6, 6, 6, 7 };                                                     //Arreglo que contendrá en cada columna las respectivas separaciones 
-                                                                                                                    //q posseen entre si los objetos
-    int screen_rep[OBJ_MAX] = { 0, 3, 3, 1, 4, 3, 3, 3, 3, 3 };                                                     //Arreglo asociada que guarda cuantas veces aparece el objeto por pantalla, en el nivel
-                                                                                                                    //si screen_rep[m][j] = 0, significa que en el nivel m, el objeto j no aparece.
+    float speed[OBJ_MAX] = {VEL(5), X_CAR_SPEED * VEL(5), X_CAR_SPEED * VEL(5),
+                        - X_CAR_SPEED * VEL(9), - X_CAR_SPEED * VEL(5),X_CAR_SPEED * VEL(5), - X_BOAT_SPEED * VEL(5), 
+                        X_BOAT_SPEED * VEL(5), - X_BOAT_SPEED * VEL(5), X_BOAT_SPEED * VEL(5)};     
+                        //Arreglo que contendrá en cada columna las respectivas velocidades de los objetos.
+
+    int separation[OBJ_MAX] = { 0, 4, 4, 7, 4, 5, 6, 6, 6, 7 };      //Arreglo que contendrá en cada columna las respectivas separaciones 
+                                                                    //q posseen entre si los objetos de misma clase
     int coor_y[OBJ_MAX] = {0, 13, 12, 11, 10, 9, 7, 6, 5, 4};
-    
-    int squares_cant[OBJ_MAX] = {1,1,1,1,1,2,3,3,3,3};
+
+    #ifndef RASPI
+        int screen_rep[OBJ_MAX] = { 0, 3, 3, 1, 4, 3, 3, 3, 3, 3 };      //Arreglo asociado que guarda cuantas veces aparece el objeto por pantalla
+        int squares_cant[OBJ_MAX] = {1,1,1,1,1,2,3,3,3,3};
+    #else
+        int screen_rep[OBJ_MAX] = { 0, 3, 0, 1, 0, 3, 3, 3, 3, 3 };      //Arreglo asociada que guarda cuantas veces aparece el objeto por pantalla
+        int squares_cant[OBJ_MAX] = {1,1,1,1,1,2,5,5,5,5};
+    #endif
     
     int i, j;
     if(sim->nivel >= 1)
@@ -64,50 +81,34 @@ void initialize_objects(world_t* sim)
             int sign = 1;
             for(i = 0; i < max; i++)
             {
-                sign *= -1;
+                sign *= -1;     //Generación aleatoria de un signo ( +1 o -1), para decidir un sentido aleatorio de las velocidades
             }
-            speed[j] = sign* (speed[j] + (0.5)*(sim->nivel)*speed[j]); //incremetno de 25% en la velocidad
-            if(j <= TRUCK && j != CAR3)
+            speed[j] = sign* (speed[j] + (0.1)*(sim->nivel)*speed[j]); //incremetno de 10% en la velocidad por cada nivel
+            
+            if(j <= TRUCK && j != CAR3) //si estoy en zona de coches
             {
-                screen_rep[j] = rand() %3 + 1;
+                if(screen_rep[j] != 0)  //el vehiculo existe (repeticion != 0)
+                    screen_rep[j] = rand() %3 + 1;  //minimo 1 maximo 3
             }            
-            else if(j == CAR3)
+            else if(j == CAR3 && screen_rep[j])  //Si es un "auto veloz" 
             {
-                screen_rep[3] = rand() % 1 + 1;
+                if(screen_rep[j] != 0)  //el vehiculo existe (repeticion != 0)
+                    screen_rep[j] = rand() % 2 + 1; //minimo 1 maximo 2
             }
-            else if(j <= TRONCO2 && j < TRUCK)
+            else if(j <= TRONCO2 && j < TRUCK)      //zona de botes
             {
-                screen_rep[j] = rand() % 1 + 2;
+                screen_rep[j] = rand() % 2 + 2; //minimo 2 maximo 3
             }
+            
         }
     }
     for(i = 1; i < OBJ_MAX; i++)
     {
         sim->objetos[i].separation = separation[i];
         sim->objetos[i].y = coor_y[i];
-        sim->objetos[i].speed = 30*speed[i];
-        #ifdef RASPI
-        if(i > TRUCK)
-        {
-            sim->objetos[i].speed = 15*speed[i];
-        }
-        #endif
+        sim->objetos[i].speed = speed[i];
         sim->objetos[i].cant_squares = squares_cant[i];
         sim->objetos[i].screen_rep = screen_rep[i];
-        #ifdef RASPI
-        if(i%2 == 0)
-        {
-            if(i <= TRUCK)
-            {
-                sim->objetos[i].screen_rep = 0;
-            }
-            /*else
-            {
-                sim->objetos[i].screen_rep = 7;
-            }*/
-                
-        }
-        #endif
         sim->objetos[i].x = (float*) malloc((sim->objetos[i].screen_rep) * sizeof(float)); // creo una especie de arreglo que contendra la coordenada en X de cada copia de este objeto.
         sim->objetos[i].x[0] =  (rand()%17);            //se designa la coordenada x de la primer variacion del objeto de manera aleatoria con un numero <= 16;
 
@@ -115,11 +116,7 @@ void initialize_objects(world_t* sim)
         
         for(k = 1; k < sim->objetos[i].screen_rep; k++)
         {
-            if (sim->objetos[i].screen_rep == 15)
-            {
-                sim->objetos[i].x [k] = k-1;
-            }
-            else
+            if(sim->objetos->screen_rep != 0)
             {
                 sim->objetos[i].x [k] = (int) (sim->objetos[i].x [k-1] + sim->objetos[i].separation) % 17; 
                 //inicializo los valores de cada coordenada x del objeto, separadas homogeneamente
@@ -242,12 +239,14 @@ void move_objects(world_t* sim)
         de entregar el codigo los enbellecemos un poco.*/
         #ifdef RASPI
             free_memory(sim, 0);
-            initialize_objects(sim);
             if(sim->nivel > 3)
             {
                 sim->menu_status = MAIN_MENU;
                 sim->key_pressed = WIN; //indica q el jugador GANO
+                sim->nivel = 0;
             }
+            initialize_objects(sim);
+            
         #endif
         //**************************************************************************************************
         //Aca podria llamar freememory e initialize objects para reinicializar todo en el nuevo nivel.
@@ -321,7 +320,7 @@ void evaluate_sep(world_t* sim, int macro_type)
         
         if(modulo < min_sep)
         {
-            flag = 1;
+            flag = 1;       //indica que no estan lo suficientemente espaciados
         }
     }
     
@@ -333,7 +332,7 @@ void evaluate_sep(world_t* sim, int macro_type)
         modulo *= -1;
     }
  
-    if(modulo < min_sep)
+    if(modulo < min_sep)        //si no estan lo suficiente separados, prendo el flag
     {
         flag = 1;
     }
