@@ -23,6 +23,10 @@
     #define X_BOAT_SPEED 1
 #endif
 
+/********************************************************************************************
+ * Liberación de memoria dinámica solicitada, para las coordeanadas en x
+¨* flag: indica si se desea liberar la memoria de la rana o no (se termina el juego o no)
+********************************************************************************************/
 void free_memory(world_t *sim, int flag)
 {
     int i;
@@ -37,6 +41,22 @@ void free_memory(world_t *sim, int flag)
     }
 }
 
+/***********************************************************************************************************************************
+*  Inicializar objetos: otorga valores iniciales a los objetos(coordenadas, velocidades, cantidad de apariciones en pantalla, etc.).
+*  Realiza una asignación de dificultad moderada en el nivel inicial, pero con coordenadas generadas de manera aleatoria.
+*  En niveles avanzados se realiza una asignación aleatoria de mayores parámetros, se incrementa la velocidad gradualmente, se
+*  aumenta/disminuye cantidad de apariciones en pantalla, separaciones y otros valores. Inicializa otros parametros importantes como
+*  los lilypads, puntos, vidas. 
+*  ## ALLEGRO ## en allegro se suma la inicialización con imagenes aleatorias  para cada objeto en cada nivel, ¡incluyendo el inicial!
+*  
+*  NOTA: para decidir aleatoriamente la cantidad de repeticiones de un objeto en pantalla, se solicita memoria dinámica, esta debe
+*  ser liberada al terminar el programa. Ver free_memory();
+*
+*  Parametros:
+*  world_t* sim: puntero a un tipo world_t donde se halla toda la información necesaria.
+*
+*  Return value: void.
+*********************************************************************************************************************/
 void initialize_objects(world_t* sim)
 {
     srand(time(0));
@@ -157,6 +177,18 @@ void initialize_objects(world_t* sim)
     return;
 }
 
+/***************************************************************************************************************************
+*  Mover objetos: función encargada de realizar la modificación de coordenadas x e y de los objetos para simular movimiento.
+*  Analiza si el jugador pasa de nivel, y se encarga de reposicionar a las ranas o terminar el juego en caso de muerte
+*
+*  Nota: realiza un llamado a collide en el medio para evaluar si hay colisiones y asi decidir si muere o la colisión es con
+*  un bote y por lo tanto sigue viva.
+*
+*  Parametros:
+*  world_t* sim: puntero a un tipo world_t donde se halla toda la información necesaria.
+*
+*  Return value: void.
+*********************************************************************************************************************/
 void move_objects(world_t* sim)
 {
     if(!(sim->objetos[FROG].speed))
@@ -288,6 +320,16 @@ void move_objects(world_t* sim)
     }
 }
 
+/*******************************************************************************************************************
+*  Evaluación de separación: elimina superposición de vehiculos visuales. Si ve que en la asignación aleatoria de posiciones
+*  dos vehículos/botes se quedan sueprpuestos, realiza una asignación arbitraria con separación homogenea entre vehículos
+*  Parametros:
+*  world_t* sim: puntero a un tipo world_t donde se halla toda la información necesaria.
+*  macro_type: número que contiene el indice del objeto en el arreglo de objetos posicionado en sim. 
+*  Este número posee una macro asociada
+*
+*  Return value: void.
+*********************************************************************************************************************/
 void evaluate_sep(world_t* sim, int macro_type)
 {
     int k, min_sep, modulo, flag = 0;
@@ -350,6 +392,14 @@ void evaluate_sep(world_t* sim, int macro_type)
     }
 }
 
+/*******************************************************************************************************************
+*  Collide: Evalúa si hay colisión entre el jugador y algun objeto. Cuenta cantidad de choques que hay ( 1 o 0)
+*  
+*  Parametros:
+*  world_t* sim: puntero a un tipo world_t donde se halla toda la información necesaria.
+*
+*  Return value: cantidad de choques por renglón (1 o 0).
+*********************************************************************************************************************/
 int collide(world_t* sim)
 {
 
@@ -378,6 +428,24 @@ int collide(world_t* sim)
     return value;
 }
 
+/*******************************************************************************************************************
+*  REDONDEO CONDICIONAL: Redondea el número al entero superior ó inferior, sí y solo sí este se encuentra entre:
+*  
+*  # ( min{0,5 ; parte_entera(n)}, máx{0,5 ; parte_entera(n)} ) si speed < 0.     
+*  # ( min{0,5 ; parte_entera(n + 1)}, máx{0,5 ; parte_entera(n + 1)} ) si speed > 0.
+*  # CUALQUIER OTRO CASO: devuelve el número sin redondear.
+*
+*  Resulta práctico cuando tenes un objeto cuya cordenada se encuentra en el medio de dos celdas y querés asociar
+*  su posición hacia una sola celda. 
+*  El condicional es porque dependiendo la velocidad, querrás que el redondeo sea hacia la izquierda o derecha 
+*  (siendo coherente con el movimiento).
+*
+*  Parametros:
+*  n: número a redondear
+*  speed: variable cuyo signo indica si redondear al entero proximo mayor o menor (en nuestros fines es la velocidad)
+*
+*  Return value: el número (redondeado o no).
+*********************************************************************************************************************/
 float round_if(float n, float speed)
 {
     if(speed > 0)       //si la velocidad es mayor a 0
