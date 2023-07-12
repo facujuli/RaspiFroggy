@@ -49,11 +49,11 @@ void initialize_objects(world_t* sim)
     
 
     sim->lily[0] = 0;
-    sim->lily[1] = 1;
-    sim->lily[2] = 1;
-    sim->lily[3] = 1;
-    sim->lily[4] = 1;
-    sim->lily[5] = 1;
+    sim->lily[1] = 0;
+    sim->lily[2] = 0;
+    sim->lily[3] = 0;
+    sim->lily[4] = 0;
+    sim->lily[5] = 0;
 
     float speed[OBJ_MAX] = {VEL(5), X_CAR_SPEED * VEL(5), X_CAR_SPEED * VEL(5),
                         - X_CAR_SPEED * VEL(9), - X_CAR_SPEED * VEL(5),X_CAR_SPEED * VEL(5), - X_BOAT_SPEED * VEL(5), 
